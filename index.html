@@ -3,60 +3,598 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloz - バーチャル試着アプリ</title>
+  <title>Cloz - AIバーチャル試着アプリ</title>
+  <meta name="description" content="Clozは、手持ちの服をAIが自動分類し、コーディネート提案とバーチャル試着ができるiOSアプリです。毎日の服選びをもっとスマートに。">
+  <meta name="keywords" content="バーチャル試着,AIコーデ,クローゼット管理,コーディネート提案,ファッションアプリ,iOS">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Cloz - AIバーチャル試着アプリ">
+  <meta property="og:description" content="手持ちの服をAIが自動分類。コーディネート提案とバーチャル試着で、毎日の服選びをもっとスマートに。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cloz-app.com">
+  <meta property="og:image" content="https://cloz-app.com/ogp.png">
+  <meta property="og:site_name" content="Cloz">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cloz - AIバーチャル試着アプリ">
+  <meta name="twitter:description" content="手持ちの服をAIが自動分類。コーディネート提案とバーチャル試着で、毎日の服選びをもっとスマートに。">
+  <meta name="twitter:image" content="https://cloz-app.com/ogp.png">
+
+  <!-- Apple Smart Banner -->
+  <meta name="apple-itunes-app" content="app-id=6759290088">
+
+  <link rel="canonical" href="https://cloz-app.com">
+
   <style>
+    :root {
+      --color-primary: #3c2f27;
+      --color-accent: #8b6f5e;
+      --color-accent-light: #a68b7b;
+      --color-bg: #faf8f6;
+      --color-surface: #ffffff;
+      --color-warm-bg: #f3ede8;
+      --color-text: #2c2420;
+      --color-text-secondary: #7a6e66;
+      --color-border: #e8e0d8;
+      --font-main: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      --max-width: 1080px;
+      --section-padding: 80px 24px;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f8fafc; color: #334155; line-height: 1.8; padding: 24px; }
-    .container { max-width: 720px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    h1 { font-size: 28px; margin-bottom: 8px; color: #0f172a; }
-    h2 { font-size: 18px; margin-top: 32px; margin-bottom: 12px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-    p { margin-bottom: 12px; font-size: 15px; }
-    .subtitle { font-size: 16px; color: #64748b; margin-bottom: 24px; }
-    a { color: #2563eb; }
-    .nav { margin-bottom: 24px; font-size: 14px; }
-    .nav a { margin-right: 16px; }
-    .feature { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-bottom: 16px; }
-    .feature h3 { font-size: 16px; color: #0f172a; margin-bottom: 8px; }
-    .feature p { margin-bottom: 0; font-size: 14px; color: #475569; }
-    .links { margin-top: 32px; }
-    .links a { display: inline-block; margin-right: 24px; font-size: 15px; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── ヘッダー ── */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(250, 248, 246, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .header-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .header-nav { display: flex; align-items: center; gap: 20px; }
+
+    .header-nav a {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .header-nav a:hover { color: var(--color-text); }
+
+    .header-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--color-primary);
+      color: #fff !important;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .header-cta:hover { opacity: 0.85; }
+
+    /* ── ヒーロー ── */
+    .hero {
+      padding: 80px 24px 0;
+      background: linear-gradient(180deg, var(--color-warm-bg) 0%, var(--color-bg) 100%);
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .hero-content {
+      text-align: center;
+      padding-bottom: 48px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--color-accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero h1 {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1.35;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #3c2010, #8b6f5e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-description {
+      font-size: 16px;
+      color: var(--color-text-secondary);
+      margin-bottom: 32px;
+      line-height: 1.9;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--color-primary);
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(60, 47, 39, 0.25);
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(60, 47, 39, 0.35);
+    }
+    .hero-cta svg { flex-shrink: 0; }
+
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    /* ヒーロー画像 */
+    .hero-screenshots {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 16px;
+      margin-top: 48px;
+    }
+
+    .hero-screenshots img {
+      width: 180px;
+      height: auto;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 8px 32px rgba(60, 47, 39, 0.15);
+    }
+
+    .hero-screenshots img:nth-child(2) {
+      width: 200px;
+      transform: translateY(-16px);
+    }
+
+
+    /* ── 機能セクション ── */
+    .features { padding: var(--section-padding); }
+
+    .features-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 56px;
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+    }
+
+    .feature-row {
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+      margin-bottom: 80px;
+      align-items: center;
+    }
+
+    .feature-row:last-child { margin-bottom: 0; }
+
+    .feature-text {
+      flex: 1;
+      max-width: 480px;
+    }
+
+    .feature-text h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-text p {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.8;
+    }
+
+    .feature-image {
+      flex-shrink: 0;
+    }
+
+    .feature-image img {
+      max-height: 480px;
+      width: auto;
+      max-width: 280px;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(60, 47, 39, 0.12);
+    }
+
+    figcaption {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* ── CTAセクション ── */
+    .cta-section {
+      padding: var(--section-padding);
+      text-align: center;
+    }
+
+    .cta-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      padding: 56px 32px;
+    }
+
+    .cta-inner::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: rgba(139, 111, 94, 0.15);
+    }
+
+    .cta-inner::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(139, 111, 94, 0.1);
+    }
+
+    .cta-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .cta-inner h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      position: relative;
+      position: relative;
+    }
+
+    .cta-inner p {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 32px;
+      position: relative;
+      position: relative;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      color: var(--color-primary);
+      padding: 16px 36px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    }
+    .cta-button svg { flex-shrink: 0; }
+
+    .cta-trust {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 20px;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    .cta-trust span {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.65);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cta-trust span::before {
+      content: '✓';
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* ── フッター ── */
+    .footer {
+      padding: 40px 24px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .footer-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--color-text); }
+
+    .footer-copy { font-size: 12px; color: var(--color-text-secondary); }
+
+    /* ── レスポンシブ ── */
+    @media (min-width: 640px) {
+      .hero h1 { font-size: 46px; }
+      .hero-description { font-size: 17px; }
+      .section-title { font-size: 32px; }
+      .hero-screenshots img { width: 180px; }
+      .hero-screenshots img:nth-child(2) { width: 210px; }
+    }
+
+    @media (min-width: 768px) {
+      :root { --section-padding: 100px 40px; }
+      .hero h1 { font-size: 52px; }
+
+      .feature-row {
+        flex-direction: row;
+        gap: 56px;
+        align-items: center;
+        text-align: left;
+        margin-bottom: 80px;
+      }
+
+      .feature-row.reverse { flex-direction: row-reverse; }
+
+      .feature-text h3 { font-size: 24px; }
+      .feature-text p { font-size: 16px; }
+    }
+
+    @media (min-width: 900px) {
+      .hero-inner {
+        display: flex;
+        align-items: flex-end;
+        gap: 48px;
+        max-width: var(--max-width);
+      }
+
+      .hero-content {
+        flex: 1;
+        text-align: left;
+        padding-bottom: 56px;
+      }
+
+      .hero-screenshots {
+        flex: 1;
+        margin-top: 0;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header-nav a:not(.header-cta) { display: none; }
+      .hero-screenshots img { display: none; }
+      .hero-screenshots img:nth-child(2) {
+        display: block;
+        width: 200px;
+        transform: none;
+      }
+      .hero-screenshots { gap: 0; justify-content: center; }
+      .feature-image img { max-width: 220px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="nav">
-      <a href="privacy.html">プライバシーポリシー</a>
-      <a href="support.html">サポート</a>
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">Cloz</a>
+      <nav class="header-nav">
+        <a href="#features">機能</a>
+        <a href="support.html">サポート</a>
+        <a href="https://apps.apple.com/jp/app/cloz/id6759290088" class="header-cta" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Store
+        </a>
+      </nav>
     </div>
+  </header>
 
-    <h1>Cloz</h1>
-    <p class="subtitle">AI を活用したバーチャル試着アプリ</p>
+  <!-- ヒーロー -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badge">完全無料・課金なし</div>
+        <h1>毎朝の服選びに、<br><span>もう迷わない。</span></h1>
+        <p class="hero-description">手持ちの服をAIが自動で整理。今日着るコーデを提案して、バーチャルで試着まで。</p>
+        <a href="https://apps.apple.com/jp/app/cloz/id6759290088" class="hero-cta" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          無料でダウンロード
+        </a>
+        <p class="hero-sub">iPhone対応 / iOS 18.1以上 / 写真はデバイス内で処理</p>
+      </div>
 
-    <p>Cloz は、手持ちの服を登録して AI がコーディネートを提案し、バーチャル試着で着用イメージを確認できる iOS アプリです。</p>
-
-    <h2>主要機能</h2>
-
-    <div class="feature">
-      <h3>服の登録・AI 自動分類</h3>
-      <p>服の写真を撮影するだけで、AI がカテゴリ・色・素材などを自動で分類。手間なくクローゼットをデジタル管理できます。</p>
+      <div class="hero-screenshots">
+        <img src="images/04-visualize.png" alt="クローゼット管理画面" loading="eager">
+        <img src="images/01-tryon.png" alt="バーチャル試着画面" loading="eager">
+        <img src="images/03-daily.png" alt="コーディネート提案画面" loading="eager">
+      </div>
     </div>
+  </section>
 
-    <div class="feature">
-      <h3>コーディネート提案</h3>
-      <p>登録した服の中から、AI があなたに合ったコーディネートを提案します。</p>
-    </div>
 
-    <div class="feature">
-      <h3>バーチャル試着</h3>
-      <p>全身写真に服を合成して、実際に着たときのイメージを確認できます。購入前の検討や毎日のコーデ選びに役立ちます。</p>
-    </div>
+  <!-- 機能紹介 -->
+  <section class="features" id="features">
+    <div class="features-inner">
+      <p class="section-label">Features</p>
+      <h2 class="section-title">クローゼットが変わると、毎日が変わる</h2>
 
-    <h2>リンク</h2>
-    <div class="links">
-      <a href="privacy.html">プライバシーポリシー</a>
-      <a href="support.html">サポート</a>
-      <a href="https://forms.gle/cHj7zBofVTwyMmDQ8" target="_blank">お問い合わせ</a>
+      <figure class="feature-row">
+        <div class="feature-image">
+          <img src="images/02-classify.png" alt="AIが服を自動で整理する画面" loading="lazy">
+        </div>
+        <div class="feature-text">
+          <h3>服を撮るだけで、AIが整理する</h3>
+          <p>撮影した服をAIがカテゴリ・色・素材を自動で分類。手間なくデジタルクローゼットが完成します。ムダ買いも防げます。</p>
+        </div>
+        <figcaption>AI自動分類</figcaption>
+      </figure>
+
+      <figure class="feature-row reverse">
+        <div class="feature-image">
+          <img src="images/04-visualize.png" alt="クローゼット一覧画面" loading="lazy">
+        </div>
+        <div class="feature-text">
+          <h3>もう「何を持っているか」に悩まない</h3>
+          <p>登録した服をすべて一覧で確認。手持ちのアイテムをいつでも把握できるから、似たような服を買ってしまうムダがなくなります。</p>
+        </div>
+        <figcaption>クローゼット管理</figcaption>
+      </figure>
+
+      <figure class="feature-row">
+        <div class="feature-image">
+          <img src="images/03-daily.png" alt="コーディネート提案画面" loading="lazy">
+        </div>
+        <div class="feature-text">
+          <h3>毎日のコーデは、AIにまかせる</h3>
+          <p>登録した服の中から、AIがあなたに合ったコーディネートを提案。カジュアル、仕事、デートなどシーンに合わせた組み合わせが見つかります。</p>
+        </div>
+        <figcaption>コーディネート提案</figcaption>
+      </figure>
+
+      <figure class="feature-row reverse">
+        <div class="feature-image">
+          <img src="images/01-tryon.png" alt="バーチャル試着画面" loading="lazy">
+        </div>
+        <div class="feature-text">
+          <h3>買う前に、着てから決める</h3>
+          <p>全身写真に服を合成して、実際に着たときのイメージを確認。重ね着の相性もわかるから、買う前の検討や毎朝のコーデ選びに役立ちます。写真処理はすべてデバイス内で完結し、外部に送信されません。</p>
+        </div>
+        <figcaption>バーチャル試着</figcaption>
+      </figure>
+
     </div>
-  </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-inner">
+        <img src="images/app-icon-web.png" alt="Cloz" class="cta-icon">
+        <h2>今日から、服選びが変わる</h2>
+        <p>無料・課金なし・いつでも削除OK。まず試してみてください。</p>
+        <a href="https://apps.apple.com/jp/app/cloz/id6759290088" class="cta-button" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          App Store で無料ダウンロード
+        </a>
+        <div class="cta-trust">
+          <span>完全無料</span>
+          <span>課金・サブスク不要</span>
+          <span>写真はデバイス内で処理</span>
+          <span>いつでも削除OK</span>
+        </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <nav class="footer-links">
+        <a href="privacy.html">プライバシーポリシー</a>
+        <a href="support.html">サポート</a>
+        <a href="https://forms.gle/cHj7zBofVTwyMmDQ8" target="_blank" rel="noopener">お問い合わせ</a>
+      </nav>
+      <p class="footer-copy">&copy; 2026 Cloz</p>
+    </div>
+  </footer>
+
 </body>
 </html>
